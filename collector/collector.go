@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -47,14 +48,11 @@ func NewCollector(stage, stateId, municipalityId *int) *colly.Collector {
 	c.OnHTML(".available-programm-container.res", func(e *colly.HTMLElement) {
 		name := e.DOM.Find(".main-desc").First().Text()
 		speed := e.DOM.Find(".secondary-desc").Text()
-		url, _ := e.DOM.Find("button").Attr("onclick")
-		finalURL := ExtractURLFromOnClick(url)
 
 		packages = append(packages, models.PackageInfo{
 			Category: "residential",
-			Name:     name,
+			Name:     strings.TrimSpace(name),
 			Speed:    speed,
-			URL:      finalURL,
 		})
 	})
 
@@ -122,7 +120,7 @@ func FetchPrefectures(c *colly.Collector, baseURL string, municipalities []model
 	*output = prefectures
 }
 
-func FetchPackages(c *colly.Collector, baseURL string, streetName string, stateName string, municipalityName string, prefectureName string, number int, output *[]models.PackageInfo) {
+func FetchPackagesViaStreet(c *colly.Collector, baseURL string, streetName string, stateName string, municipalityName string, prefectureName string, number int, output *[]models.PackageInfo) {
 	u := fmt.Sprintf("%s?Accept-Language=en-US,en;q=0.9,el-GR;q=0.8,el;q=0.7&mTelno=&mAddress=%s&mState=%s&mPrefecture=%s&mNumber=%d&mArea=%s&searchcriteria=address&ct=res",
 		baseURL,
 		url.QueryEscape(streetName),
@@ -140,17 +138,20 @@ func FetchPackages(c *colly.Collector, baseURL string, streetName string, stateN
 	*output = packages
 }
 
-func ExtractURLFromOnClick(onclick string) string {
-	// e.g., resultsRedirection('https://...') → extract the URL
-	start := "resultsRedirection('"
-	end := "')"
+func FetchPackagesViaTelephone(c *colly.Collector, baseURL string, telephone string, output *[]models.PackageInfo) {
+	u := fmt.Sprintf("%s?Accept-Language=en-US,en;q=0.9,el-GR;q=0.8,el;q=0.7&mTelno=%s&searchcriteria=tel&ct=res",
+		baseURL,
+		url.QueryEscape(telephone),
+	)
 
-	i := len(start)
-	j := len(onclick) - len(end)
-
-	if len(onclick) > i+1 && onclick[:i] == start && onclick[j:] == end {
-		return onclick[i:j]
+	err := c.Visit(u)
+	if err != nil {
+		log.Printf("Error fetching packages for telephone %s: %v\n", telephone, err)
 	}
 
-	return ""
+	for index := range packages {
+		packages[index].Telephone = telephone
+	}
+
+	*output = packages
 }

@@ -19,8 +19,12 @@ type Prefecture struct {
 }
 
 type PackageInfo struct {
-	Category string `json:"category"`
-	Name     string `json:"name"`
-	Speed    string `json:"speed"`
-	URL      string `json:"url"`
+	Telephone string `json:"telephone"`
+	Category  string `json:"category"`
+	Name      string `json:"name"`
+	Speed     string `json:"speed"`
+}
+
+type Input struct {
+	Telephones []string `yaml:"telephones"`
 }

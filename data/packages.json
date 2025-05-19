@@ -1,1 +1,38 @@
-null
+[
+  {
+    "telephone": "2610312231",
+    "category": "residential",
+    "name": "ADSL",
+    "speed": "24 Mbps"
+  },
+  {
+    "telephone": "2610312290",
+    "category": "residential",
+    "name": "ADSL",
+    "speed": "24 Mbps"
+  },
+  {
+    "telephone": "2610312290",
+    "category": "residential",
+    "name": "COSMOTE Fiber",
+    "speed": "200 Mbps"
+  },
+  {
+    "telephone": "2610312290",
+    "category": "residential",
+    "name": "COSMOTE Fiber",
+    "speed": "100 Mbps"
+  },
+  {
+    "telephone": "2610312290",
+    "category": "residential",
+    "name": "COSMOTE Fiber",
+    "speed": "50 Mbps"
+  },
+  {
+    "telephone": "2610312290",
+    "category": "residential",
+    "name": "ADSL",
+    "speed": "24 Mbps"
+  }
+]

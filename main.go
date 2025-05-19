@@ -8,12 +8,16 @@ import (
 	"os"
 	"strconv"
 
+	"gopkg.in/yaml.v3"
+
 	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
 	crawlBaseURL := os.Getenv("CRAWL_BASE_URL")
 	crawlEnabled, _ := strconv.ParseBool(os.Getenv("CRAWL_ENABLED"))
+
+	querylBaseURL := os.Getenv("QUERY_BASE_URL")
 
 	stage := new(int)
 	stateId := new(int)
@@ -49,6 +53,24 @@ func main() {
 
 		log.Println("Crawling complete.")
 	}
-	collector.FetchPackages(c, "https://www.cosmote.gr/selfcare/jsp/ajax/avdslavailabilityAjaxV2.jsp", "ΣΕΙΛΙΣΤΡΙΑΣ (ΟΔΟΣ)", "Ν. ΑΤΤΙΚΗΣ", "Δ. ΖΩΓΡΑΦΟΥ", "ΖΩΓΡΑΦΟΥ-ΑΝΩ ΙΛΙΣΙΑ", 56, &packages)
+
+	data, err := os.ReadFile("input.yaml")
+	if err != nil {
+		log.Fatalf("Failed to read file: %v", err)
+	}
+
+	var inputList models.Input
+	err = yaml.Unmarshal(data, &inputList)
+	if err != nil {
+		log.Fatalf("Failed to parse input: %v", err)
+	}
+
+	for _, tel := range inputList.Telephones {
+		var pck []models.PackageInfo
+		collector.FetchPackagesViaTelephone(c, querylBaseURL, tel, &pck)
+
+		packages = append(packages, pck...)
+	}
+
 	utils.WriteJSON("data/packages.json", packages)
 }
